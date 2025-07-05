@@ -1,0 +1,130 @@
+.folder-selector {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	padding: 32px;
+	background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.folder-selector-content {
+	max-width: 800px;
+	width: 100%;
+	text-align: center;
+}
+
+.folder-selector-content h2 {
+	font-size: 28px;
+	font-weight: 400;
+	color: var(--secondary-gray);
+	margin-bottom: 16px;
+}
+
+.folder-selector-content p {
+	font-size: 16px;
+	color: var(--secondary-gray);
+	margin-bottom: 32px;
+	opacity: 0.8;
+}
+
+.folder-selection-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 24px;
+	margin-bottom: 32px;
+}
+
+.folder-card {
+	background: var(--white);
+	border: 1px solid var(--border-gray);
+	border-radius: 8px;
+	padding: 24px;
+	box-shadow: var(--shadow);
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.folder-card:hover {
+	transform: translateY(-2px);
+	box-shadow: var(--shadow-hover);
+}
+
+.folder-card h3 {
+	font-size: 18px;
+	font-weight: 500;
+	color: var(--secondary-gray);
+	margin-bottom: 8px;
+}
+
+.folder-card p {
+	font-size: 14px;
+	color: var(--secondary-gray);
+	opacity: 0.7;
+	margin-bottom: 16px;
+}
+
+.folder-card .btn {
+	width: 100%;
+	padding: 12px 24px;
+	font-weight: 500;
+}
+
+.selected-path {
+	margin-top: 12px;
+	padding: 8px 12px;
+	background: var(--light-gray);
+	border-radius: 4px;
+	font-size: 13px;
+	color: var(--secondary-gray);
+	word-break: break-all;
+	position: relative;
+}
+
+.selected-path.auto-loaded {
+	background: #e8f5e8;
+	border-left: 3px solid var(--success-green);
+}
+
+.selected-path.auto-loaded::before {
+	content: "↻ ";
+	color: var(--success-green);
+	font-weight: bold;
+}
+
+.start-section {
+	border-top: 1px solid var(--border-gray);
+	padding-top: 32px;
+}
+
+.start-section .btn {
+	padding: 16px 48px;
+	font-size: 16px;
+	font-weight: 500;
+	min-width: 200px;
+}
+
+.btn.disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	pointer-events: none;
+}
+
+.operation-status {
+	margin-top: 16px;
+	padding: 12px 24px;
+	background: var(--light-gray);
+	border-radius: 6px;
+	font-size: 14px;
+	color: var(--secondary-gray);
+	display: inline-block;
+}
+
+@media (max-width: 768px) {
+	.folder-selection-grid {
+		grid-template-columns: 1fr;
+		gap: 16px;
+	}
+
+	.folder-card {
+		padding: 20px;
+	}
+}
