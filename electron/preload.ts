@@ -11,6 +11,13 @@ export interface ElectronAPI {
 	getAlbums: (destinationPath: string) => Promise<{ name: string; photoCount: number }[]>;
 	getSavedFolders: () => Promise<{ sourceFolder: string | null; destinationFolder: string | null }>;
 	saveFolders: (sourceFolder: string | null, destinationFolder: string | null) => Promise<void>;
+	checkFileExistsInAlbum: (
+		sourcePath: string,
+		destinationPath: string,
+		albumName: string
+	) => Promise<boolean>;
+	savePhotoIndex: (sourceFolder: string, photoIndex: number) => Promise<void>;
+	getSavedPhotoIndex: (sourceFolder: string) => Promise<number>;
 }
 
 const electronAPI: ElectronAPI = {
@@ -27,6 +34,12 @@ const electronAPI: ElectronAPI = {
 	getSavedFolders: () => ipcRenderer.invoke("get-saved-folders"),
 	saveFolders: (sourceFolder: string | null, destinationFolder: string | null) =>
 		ipcRenderer.invoke("save-folders", sourceFolder, destinationFolder),
+	checkFileExistsInAlbum: (sourcePath: string, destinationPath: string, albumName: string) =>
+		ipcRenderer.invoke("check-file-exists-in-album", sourcePath, destinationPath, albumName),
+	savePhotoIndex: (sourceFolder: string, photoIndex: number) =>
+		ipcRenderer.invoke("save-photo-index", sourceFolder, photoIndex),
+	getSavedPhotoIndex: (sourceFolder: string) =>
+		ipcRenderer.invoke("get-saved-photo-index", sourceFolder),
 };
 
 contextBridge.exposeInMainWorld("electronAPI", electronAPI);

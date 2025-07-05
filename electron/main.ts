@@ -6,6 +6,8 @@ import sharp from "sharp";
 interface AppSettings {
 	lastSourceFolder?: string;
 	lastDestinationFolder?: string;
+	lastPhotoIndex?: number;
+	lastSourceFolderHash?: string;
 }
 
 class PhotoOrganizerApp {
@@ -92,6 +94,51 @@ class PhotoOrganizerApp {
 		// }
 	}
 
+	private async generateFolderHash(folderPath: string): Promise<string> {
+		try {
+			const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".tiff", ".tif"];
+			const images: string[] = [];
+
+			const scanRecursive = async (dir: string): Promise<void> => {
+				const items = await fs.readdir(dir);
+
+				for (const item of items) {
+					const fullPath = path.join(dir, item);
+					const stat = await fs.stat(fullPath);
+
+					if (stat.isDirectory()) {
+						await scanRecursive(fullPath);
+					} else if (stat.isFile()) {
+						const ext = path.extname(item).toLowerCase();
+						if (imageExtensions.includes(ext)) {
+							// Include both path and modification time for hash
+							images.push(`${fullPath}:${stat.mtime.getTime()}`);
+						}
+					}
+				}
+			};
+
+			await scanRecursive(folderPath);
+
+			// Sort for consistent hash and create a simple hash
+			const sortedImages = images.sort();
+			const hashInput = sortedImages.join("|");
+
+			// Simple hash function (for basic change detection)
+			let hash = 0;
+			for (let i = 0; i < hashInput.length; i++) {
+				const char = hashInput.charCodeAt(i);
+				hash = (hash << 5) - hash + char;
+				hash = hash & hash; // Convert to 32-bit integer
+			}
+
+			return hash.toString();
+		} catch (error) {
+			console.error("Error generating folder hash:", error);
+			return "";
+		}
+	}
+
 	private setupIpcHandlers(): void {
 		// Get saved folder paths
 		ipcMain.handle("get-saved-folders", async () => {
@@ -112,6 +159,48 @@ class PhotoOrganizerApp {
 				await this.saveSettings(settings);
 			}
 		);
+
+		// Save current photo index
+		ipcMain.handle("save-photo-index", async (_, sourceFolder: string, photoIndex: number) => {
+			try {
+				const settings = await this.loadSettings();
+				const folderHash = await this.generateFolderHash(sourceFolder);
+
+				settings.lastSourceFolder = sourceFolder;
+				settings.lastPhotoIndex = photoIndex;
+				settings.lastSourceFolderHash = folderHash;
+
+				await this.saveSettings(settings);
+			} catch (error) {
+				console.error("Error saving photo index:", error);
+			}
+		});
+
+		// Get saved photo index
+		ipcMain.handle("get-saved-photo-index", async (_, sourceFolder: string) => {
+			try {
+				const settings = await this.loadSettings();
+
+				// Check if it's the same folder as last time
+				if (settings.lastSourceFolder === sourceFolder && settings.lastSourceFolderHash) {
+					const currentHash = await this.generateFolderHash(sourceFolder);
+
+					// If folder contents haven't changed, return saved index
+					if (
+						currentHash === settings.lastSourceFolderHash &&
+						settings.lastPhotoIndex !== undefined
+					) {
+						return settings.lastPhotoIndex;
+					}
+				}
+
+				// Return 0 if folder changed or no saved index
+				return 0;
+			} catch (error) {
+				console.error("Error getting saved photo index:", error);
+				return 0;
+			}
+		});
 
 		// Serve image file
 		ipcMain.handle("get-image-data", async (_, imagePath: string) => {
@@ -224,6 +313,22 @@ class PhotoOrganizerApp {
 				return null;
 			}
 		});
+
+		// Check if file exists in album
+		ipcMain.handle(
+			"check-file-exists-in-album",
+			async (_, sourcePath: string, destinationPath: string, albumName: string) => {
+				try {
+					const albumPath = path.join(destinationPath, albumName);
+					const fileName = path.basename(sourcePath);
+					const targetPath = path.join(albumPath, fileName);
+					return await fs.pathExists(targetPath);
+				} catch (error) {
+					console.error("Error checking file existence:", error);
+					return false;
+				}
+			}
+		);
 
 		// Copy file to album
 		ipcMain.handle(

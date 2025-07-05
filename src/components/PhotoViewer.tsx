@@ -8,6 +8,8 @@ const PhotoViewer: React.FC = () => {
 	const [selectedAlbum, setSelectedAlbum] = useState<string>("");
 	const [newAlbumName, setNewAlbumName] = useState<string>("");
 	const [isCreatingAlbum, setIsCreatingAlbum] = useState(false);
+	const [fileExistsInAlbum, setFileExistsInAlbum] = useState<boolean>(false);
+	const [assignmentError, setAssignmentError] = useState<string>("");
 
 	const currentPhoto = state.photos[state.currentPhotoIndex];
 
@@ -27,6 +29,54 @@ const PhotoViewer: React.FC = () => {
 
 		loadImage();
 	}, [currentPhoto]);
+
+	// Check if file already exists in selected album
+	useEffect(() => {
+		const checkFileExists = async () => {
+			if (currentPhoto && selectedAlbum && state.destinationFolder && window.electronAPI) {
+				try {
+					const exists = await window.electronAPI.checkFileExistsInAlbum(
+						currentPhoto.path,
+						state.destinationFolder,
+						selectedAlbum
+					);
+					setFileExistsInAlbum(exists);
+					if (exists) {
+						setAssignmentError("File already exists in this album");
+					} else {
+						setAssignmentError("");
+					}
+				} catch (error) {
+					console.error("Error checking file existence:", error);
+					setFileExistsInAlbum(false);
+					setAssignmentError("");
+				}
+			} else {
+				setFileExistsInAlbum(false);
+				setAssignmentError("");
+			}
+		};
+
+		checkFileExists();
+	}, [currentPhoto, selectedAlbum, state.destinationFolder]);
+
+	// Save photo index whenever it changes
+	useEffect(() => {
+		const savePhotoIndex = async () => {
+			if (state.sourceFolder && window.electronAPI.savePhotoIndex) {
+				try {
+					await window.electronAPI.savePhotoIndex(state.sourceFolder, state.currentPhotoIndex);
+				} catch (error) {
+					console.error("Error saving photo index:", error);
+				}
+			}
+		};
+
+		// Only save if we have photos and a valid index
+		if (state.photos.length > 0 && state.currentPhotoIndex >= 0) {
+			savePhotoIndex();
+		}
+	}, [state.currentPhotoIndex, state.sourceFolder, state.photos.length]);
 
 	useEffect(() => {
 		const handleKeyPress = (e: KeyboardEvent) => {
@@ -73,6 +123,7 @@ const PhotoViewer: React.FC = () => {
 				setSelectedAlbum(newAlbumName.trim());
 				setNewAlbumName("");
 				setIsCreatingAlbum(false);
+				setAssignmentError("");
 			}
 		} catch (error) {
 			console.error("Error creating album:", error);
@@ -80,10 +131,11 @@ const PhotoViewer: React.FC = () => {
 	};
 
 	const handleAssignPhoto = async () => {
-		if (!currentPhoto || !selectedAlbum || !state.destinationFolder) return;
+		if (!currentPhoto || !selectedAlbum || !state.destinationFolder || fileExistsInAlbum) return;
 
 		dispatch({ type: "SET_LOADING", payload: true });
 		dispatch({ type: "SET_OPERATION", payload: `Copying to ${selectedAlbum}...` });
+		setAssignmentError("");
 
 		try {
 			const result = await window.electronAPI.copyFileToAlbum(
@@ -102,11 +154,19 @@ const PhotoViewer: React.FC = () => {
 					dispatch({ type: "SET_OPERATION", payload: null });
 				}, 2000);
 			} else {
-				dispatch({ type: "SET_OPERATION", payload: `Error: ${result.error}` });
+				// Handle local assignment error instead of global operation
+				if (result.error === "File already exists") {
+					setAssignmentError("File already exists in this album");
+					setFileExistsInAlbum(true);
+				} else {
+					setAssignmentError(result.error || "Error copying file");
+				}
+				dispatch({ type: "SET_OPERATION", payload: null });
 			}
 		} catch (error) {
 			console.error("Error assigning photo:", error);
-			dispatch({ type: "SET_OPERATION", payload: "Error copying file" });
+			setAssignmentError("Error copying file");
+			dispatch({ type: "SET_OPERATION", payload: null });
 		} finally {
 			dispatch({ type: "SET_LOADING", payload: false });
 		}
@@ -171,7 +231,10 @@ const PhotoViewer: React.FC = () => {
 					<div className="album-selection">
 						<select
 							value={selectedAlbum}
-							onChange={(e) => setSelectedAlbum(e.target.value)}
+							onChange={(e) => {
+								setSelectedAlbum(e.target.value);
+								setAssignmentError("");
+							}}
 							className="album-select"
 						>
 							<option value="">Select an album...</option>
@@ -216,12 +279,16 @@ const PhotoViewer: React.FC = () => {
 					)}
 
 					<button
-						className={`btn btn-primary assign-btn ${!selectedAlbum ? "disabled" : ""}`}
+						className={`btn btn-primary assign-btn ${
+							!selectedAlbum || fileExistsInAlbum ? "disabled" : ""
+						}`}
 						onClick={handleAssignPhoto}
-						disabled={!selectedAlbum || state.isLoading}
+						disabled={!selectedAlbum || state.isLoading || fileExistsInAlbum}
 					>
 						{state.isLoading ? "Copying..." : "Assign Photo (Space)"}
 					</button>
+
+					{assignmentError && <div className="assignment-error">{assignmentError}</div>}
 				</div>
 			</div>
 		</div>

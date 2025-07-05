@@ -146,6 +146,17 @@
 	pointer-events: none;
 }
 
+.assignment-error {
+	margin-top: 8px;
+	padding: 8px 12px;
+	background: #fef2f2;
+	border: 1px solid #fecaca;
+	border-radius: 6px;
+	color: #dc2626;
+	font-size: 14px;
+	line-height: 1.4;
+}
+
 @media (max-width: 1024px) {
 	.assignment-panel {
 		width: 250px;

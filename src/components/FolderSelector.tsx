@@ -82,7 +82,26 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({ onSetupComplete }) => {
 			}));
 
 			dispatch({ type: "SET_PHOTOS", payload: photos });
-			dispatch({ type: "SET_OPERATION", payload: null });
+
+			// Restore saved photo index if the folder contents haven't changed
+			if (window.electronAPI.getSavedPhotoIndex) {
+				const savedIndex = await window.electronAPI.getSavedPhotoIndex(state.sourceFolder);
+				if (savedIndex > 0 && savedIndex < photos.length) {
+					dispatch({ type: "SET_CURRENT_PHOTO", payload: savedIndex });
+					dispatch({
+						type: "SET_OPERATION",
+						payload: `Resumed from photo ${savedIndex + 1} of ${photos.length}`,
+					});
+					setTimeout(() => {
+						dispatch({ type: "SET_OPERATION", payload: null });
+					}, 3000);
+				} else {
+					dispatch({ type: "SET_OPERATION", payload: null });
+				}
+			} else {
+				dispatch({ type: "SET_OPERATION", payload: null });
+			}
+
 			onSetupComplete();
 		} catch (error) {
 			console.error("Error scanning folder:", error);

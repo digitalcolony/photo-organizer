@@ -26,6 +26,13 @@ declare global {
 				destinationFolder: string | null;
 			}>;
 			saveFolders: (sourceFolder: string | null, destinationFolder: string | null) => Promise<void>;
+			checkFileExistsInAlbum: (
+				sourcePath: string,
+				destinationPath: string,
+				albumName: string
+			) => Promise<boolean>;
+			savePhotoIndex: (sourceFolder: string, photoIndex: number) => Promise<void>;
+			getSavedPhotoIndex: (sourceFolder: string) => Promise<number>;
 		};
 	}
 }
