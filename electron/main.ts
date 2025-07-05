@@ -367,6 +367,38 @@ class PhotoOrganizerApp {
 			}
 		});
 
+		// Get photos in a specific album
+		ipcMain.handle("get-album-photos", async (_, destinationPath: string, albumName: string) => {
+			try {
+				const albumPath = path.join(destinationPath, albumName);
+
+				if (!(await fs.pathExists(albumPath))) {
+					return [];
+				}
+
+				const items = await fs.readdir(albumPath);
+				const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".tiff", ".tif"];
+				const photos: string[] = [];
+
+				for (const item of items) {
+					const itemPath = path.join(albumPath, item);
+					const stat = await fs.stat(itemPath);
+
+					if (stat.isFile()) {
+						const ext = path.extname(item).toLowerCase();
+						if (imageExtensions.includes(ext)) {
+							photos.push(item); // Just return the filename, not full path
+						}
+					}
+				}
+
+				return photos.sort(); // Sort alphabetically
+			} catch (error) {
+				console.error("Error getting album photos:", error);
+				return [];
+			}
+		});
+
 		// Get existing albums with photo counts
 		ipcMain.handle("get-albums", async (_, destinationPath: string) => {
 			try {

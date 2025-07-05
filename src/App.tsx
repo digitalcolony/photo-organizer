@@ -33,6 +33,7 @@ declare global {
 			) => Promise<boolean>;
 			savePhotoIndex: (sourceFolder: string, photoIndex: number) => Promise<void>;
 			getSavedPhotoIndex: (sourceFolder: string) => Promise<number>;
+			getAlbumPhotos: (destinationPath: string, albumName: string) => Promise<string[]>;
 		};
 	}
 }

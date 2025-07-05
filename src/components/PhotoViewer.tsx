@@ -10,6 +10,7 @@ const PhotoViewer: React.FC = () => {
 	const [isCreatingAlbum, setIsCreatingAlbum] = useState(false);
 	const [fileExistsInAlbum, setFileExistsInAlbum] = useState<boolean>(false);
 	const [assignmentError, setAssignmentError] = useState<string>("");
+	const [successMessage, setSuccessMessage] = useState<string>("");
 
 	const currentPhoto = state.photos[state.currentPhotoIndex];
 
@@ -46,6 +47,7 @@ const PhotoViewer: React.FC = () => {
 					} else {
 						setAssignmentError("");
 					}
+					// Don't clear success message here - let it clear on its own timer
 				} catch (error) {
 					console.error("Error checking file existence:", error);
 					setFileExistsInAlbum(false);
@@ -54,6 +56,7 @@ const PhotoViewer: React.FC = () => {
 			} else {
 				setFileExistsInAlbum(false);
 				setAssignmentError("");
+				// Don't clear success message here either
 			}
 		};
 
@@ -134,8 +137,8 @@ const PhotoViewer: React.FC = () => {
 		if (!currentPhoto || !selectedAlbum || !state.destinationFolder || fileExistsInAlbum) return;
 
 		dispatch({ type: "SET_LOADING", payload: true });
-		dispatch({ type: "SET_OPERATION", payload: `Copying to ${selectedAlbum}...` });
 		setAssignmentError("");
+		setSuccessMessage("");
 
 		try {
 			const result = await window.electronAPI.copyFileToAlbum(
@@ -147,12 +150,14 @@ const PhotoViewer: React.FC = () => {
 			if (result.success) {
 				// Increment album count
 				dispatch({ type: "INCREMENT_ALBUM_COUNT", payload: selectedAlbum });
+				// Show local success message
+				setSuccessMessage(`Copied to ${selectedAlbum}`);
 				// Auto-advance to next photo
 				handleNextPhoto();
-				dispatch({ type: "SET_OPERATION", payload: `Copied to ${selectedAlbum}` });
+				// Clear success message after 3 seconds
 				setTimeout(() => {
-					dispatch({ type: "SET_OPERATION", payload: null });
-				}, 2000);
+					setSuccessMessage("");
+				}, 3000);
 			} else {
 				// Handle local assignment error instead of global operation
 				if (result.error === "File already exists") {
@@ -161,12 +166,10 @@ const PhotoViewer: React.FC = () => {
 				} else {
 					setAssignmentError(result.error || "Error copying file");
 				}
-				dispatch({ type: "SET_OPERATION", payload: null });
 			}
 		} catch (error) {
 			console.error("Error assigning photo:", error);
 			setAssignmentError("Error copying file");
-			dispatch({ type: "SET_OPERATION", payload: null });
 		} finally {
 			dispatch({ type: "SET_LOADING", payload: false });
 		}
@@ -223,9 +226,10 @@ const PhotoViewer: React.FC = () => {
 								"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBmb3VuZDwvdGV4dD48L3N2Zz4=";
 						}}
 					/>
-				</div>
-
+				</div>{" "}
 				<div className="assignment-panel">
+					{successMessage && <div className="success-message">{successMessage}</div>}
+
 					<h4>Assign to Album</h4>
 
 					<div className="album-selection">
@@ -234,6 +238,7 @@ const PhotoViewer: React.FC = () => {
 							onChange={(e) => {
 								setSelectedAlbum(e.target.value);
 								setAssignmentError("");
+								setSuccessMessage("");
 							}}
 							className="album-select"
 						>
@@ -245,7 +250,13 @@ const PhotoViewer: React.FC = () => {
 							))}
 						</select>
 
-						<button className="btn" onClick={() => setIsCreatingAlbum(true)}>
+						<button
+							className="btn"
+							onClick={() => {
+								setIsCreatingAlbum(true);
+								setSuccessMessage("");
+							}}
+						>
 							New Album
 						</button>
 					</div>

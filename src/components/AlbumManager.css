@@ -45,6 +45,10 @@
 }
 
 .album-item {
+	margin-bottom: 4px;
+}
+
+.album-header-item {
 	display: flex;
 	align-items: center;
 	padding: 12px 24px;
@@ -52,8 +56,113 @@
 	transition: background-color 0.2s ease;
 }
 
-.album-item:hover {
+.album-header-item:hover {
 	background: var(--light-gray);
+}
+
+.album-toggle {
+	font-size: 16px;
+	margin-right: 8px;
+	min-width: 20px;
+}
+
+.album-expand-icon {
+	font-size: 12px;
+	color: var(--secondary-gray);
+	opacity: 0.6;
+	margin-left: 8px;
+	transition: transform 0.2s ease;
+}
+
+.album-photos {
+	background: var(--light-gray);
+	border-left: 2px solid var(--border-gray);
+	margin-left: 24px;
+	border-radius: 0 0 8px 8px;
+}
+
+.photos-loading {
+	padding: 16px 20px;
+	text-align: center;
+	color: var(--secondary-gray);
+	opacity: 0.7;
+	font-size: 14px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+}
+
+.loading-spinner {
+	animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.photos-error {
+	padding: 16px 20px;
+	text-align: center;
+	color: #d32f2f;
+	font-size: 14px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+}
+
+.error-icon {
+	font-size: 16px;
+}
+
+.no-photos-in-album {
+	padding: 16px 20px;
+	text-align: center;
+	color: var(--secondary-gray);
+	opacity: 0.7;
+	font-size: 14px;
+	font-style: italic;
+}
+
+.photo-list {
+	list-style: none;
+	padding: 8px 0;
+	margin: 0;
+	max-height: 200px;
+	overflow-y: auto;
+}
+
+.photo-item {
+	display: flex;
+	align-items: center;
+	padding: 6px 20px;
+	transition: background-color 0.2s ease;
+	cursor: pointer;
+}
+
+.photo-item:hover {
+	background: var(--white);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.photo-icon {
+	font-size: 14px;
+	margin-right: 8px;
+	opacity: 0.7;
+}
+
+.photo-name {
+	font-size: 13px;
+	color: var(--secondary-gray);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .album-icon {
@@ -112,19 +221,23 @@
 }
 
 /* Scrollbar styling */
-.album-list::-webkit-scrollbar {
+.album-list::-webkit-scrollbar,
+.photo-list::-webkit-scrollbar {
 	width: 6px;
 }
 
-.album-list::-webkit-scrollbar-track {
+.album-list::-webkit-scrollbar-track,
+.photo-list::-webkit-scrollbar-track {
 	background: var(--light-gray);
 }
 
-.album-list::-webkit-scrollbar-thumb {
+.album-list::-webkit-scrollbar-thumb,
+.photo-list::-webkit-scrollbar-thumb {
 	background: var(--border-gray);
 	border-radius: 3px;
 }
 
-.album-list::-webkit-scrollbar-thumb:hover {
+.album-list::-webkit-scrollbar-thumb:hover,
+.photo-list::-webkit-scrollbar-thumb:hover {
 	background: var(--secondary-gray);
 }

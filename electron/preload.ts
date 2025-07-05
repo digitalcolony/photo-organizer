@@ -18,6 +18,7 @@ export interface ElectronAPI {
 	) => Promise<boolean>;
 	savePhotoIndex: (sourceFolder: string, photoIndex: number) => Promise<void>;
 	getSavedPhotoIndex: (sourceFolder: string) => Promise<number>;
+	getAlbumPhotos: (destinationPath: string, albumName: string) => Promise<string[]>;
 }
 
 const electronAPI: ElectronAPI = {
@@ -40,6 +41,8 @@ const electronAPI: ElectronAPI = {
 		ipcRenderer.invoke("save-photo-index", sourceFolder, photoIndex),
 	getSavedPhotoIndex: (sourceFolder: string) =>
 		ipcRenderer.invoke("get-saved-photo-index", sourceFolder),
+	getAlbumPhotos: (destinationPath: string, albumName: string) =>
+		ipcRenderer.invoke("get-album-photos", destinationPath, albumName),
 };
 
 contextBridge.exposeInMainWorld("electronAPI", electronAPI);
