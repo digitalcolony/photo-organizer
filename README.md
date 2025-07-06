@@ -149,7 +149,7 @@ The application follows Electron's main/renderer process architecture with enhan
 - **State Management**: Centralized Context API with reducer pattern for predictable state updates
 - **Session Persistence**: JSON-based settings storage in user data directory with folder change detection
 
-## Phase 1 Features (MVP) ✅ **COMPLETED**
+## Features (MVP) ✅ **COMPLETED**
 
 - [x] Basic image preview and navigation
 - [x] Simple album creation and assignment with duplicate prevention
@@ -163,24 +163,6 @@ The application follows Electron's main/renderer process architecture with enhan
 - [x] Debug panel for troubleshooting
 - [x] Smart folder content change detection
 - [x] Progress tracking and statistics
-
-## Phase 2 Features (In Development)
-
-- [ ] File renaming functionality
-- [ ] Undo operations with history stack
-- [ ] Enhanced UI/UX improvements and animations
-- [ ] Settings and preferences panel
-- [ ] Thumbnail caching for performance
-- [ ] Bulk photo selection and operations
-
-## Phase 3 Features (Planned)
-
-- [ ] Advanced batch operations
-- [ ] Duplicate detection and removal
-- [ ] EXIF metadata display and editing
-- [ ] Performance optimizations for large photo collections
-- [ ] Photo filters and search functionality
-- [ ] Cloud storage integration
 
 ## Troubleshooting
 
