@@ -4,6 +4,7 @@ import FolderSelector from "./components/FolderSelector";
 import PhotoViewer from "./components/PhotoViewer";
 import AlbumManager from "./components/AlbumManager";
 import StatusBar from "./components/StatusBar";
+import DebugPanel from "./components/DebugPanel";
 import "./App.css";
 
 declare global {
@@ -70,6 +71,7 @@ const App: React.FC = () => {
 				</main>
 
 				<StatusBar />
+				{isElectron && <DebugPanel />}
 			</div>
 		</PhotoProvider>
 	);

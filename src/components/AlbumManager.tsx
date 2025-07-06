@@ -93,64 +93,67 @@ const AlbumManager: React.FC = () => {
 						<p className="hint">Create an album while organizing photos</p>
 					</div>
 				) : (
-					state.albums.map((album) => {
-						const albumState = expandedAlbums[album.name];
-						const isExpanded = albumState?.isExpanded || false;
-						const isLoading = albumState?.isLoading || false;
-						const photos = albumState?.photos || [];
-						const hasError = albumState?.error;
+					state.albums
+						.slice() // Create a copy to avoid mutating the original array
+						.sort((a, b) => a.name.localeCompare(b.name)) // Ensure alphabetical sorting
+						.map((album) => {
+							const albumState = expandedAlbums[album.name];
+							const isExpanded = albumState?.isExpanded || false;
+							const isLoading = albumState?.isLoading || false;
+							const photos = albumState?.photos || [];
+							const hasError = albumState?.error;
 
-						return (
-							<div key={album.name} className="album-item">
-								<div
-									className="album-header-item"
-									onClick={() => toggleAlbum(album.name)}
-									style={{ cursor: "pointer" }}
-								>
-									<div className="album-toggle">{isExpanded ? "📂" : "📁"}</div>
-									<div className="album-details">
-										<div className="album-name">{album.name}</div>
-										<div className="album-info">
-											{album.photoCount} photo{album.photoCount !== 1 ? "s" : ""}
+							return (
+								<div key={album.name} className="album-item">
+									<div
+										className="album-header-item"
+										onClick={() => toggleAlbum(album.name)}
+										style={{ cursor: "pointer" }}
+									>
+										<div className="album-toggle">{isExpanded ? "📂" : "📁"}</div>
+										<div className="album-details">
+											<div className="album-name">{album.name}</div>
+											<div className="album-info">
+												{album.photoCount} photo{album.photoCount !== 1 ? "s" : ""}
+											</div>
 										</div>
+										<div className="album-expand-icon">{isExpanded ? "▼" : "▶"}</div>
 									</div>
-									<div className="album-expand-icon">{isExpanded ? "▼" : "▶"}</div>
-								</div>
 
-								{isExpanded && (
-									<div className="album-photos">
-										{isLoading ? (
-											<div className="photos-loading">
-												<span className="loading-spinner">⏳</span>
-												Loading photos...
-											</div>
-										) : hasError ? (
-											<div className="photos-error">
-												<span className="error-icon">⚠️</span>
-												{hasError}
-											</div>
-										) : photos.length === 0 ? (
-											<div className="no-photos-in-album">No photos in this album</div>
-										) : (
-											<ul className="photo-list">
-												{photos.map((photoName, index) => (
-													<li
-														key={index}
-														className="photo-item"
-														onClick={() => navigateToPhoto(photoName)}
-														title={`Click to view ${photoName}`}
-													>
-														<span className="photo-icon">🖼️</span>
-														<span className="photo-name">{photoName}</span>
-													</li>
-												))}
-											</ul>
-										)}
-									</div>
-								)}
-							</div>
-						);
-					})
+									{isExpanded && (
+										<div className="album-photos">
+											{isLoading ? (
+												<div className="photos-loading">
+													<span className="loading-spinner">⏳</span>
+													Loading photos...
+												</div>
+											) : hasError ? (
+												<div className="photos-error">
+													<span className="error-icon">⚠️</span>
+													{hasError}
+												</div>
+											) : photos.length === 0 ? (
+												<div className="no-photos-in-album">No photos in this album</div>
+											) : (
+												<ul className="photo-list">
+													{photos.map((photoName, index) => (
+														<li
+															key={index}
+															className="photo-item"
+															onClick={() => navigateToPhoto(photoName)}
+															title={`Click to view ${photoName}`}
+														>
+															<span className="photo-icon">🖼️</span>
+															<span className="photo-name">{photoName}</span>
+														</li>
+													))}
+												</ul>
+											)}
+										</div>
+									)}
+								</div>
+							);
+						})
 				)}
 			</div>
 

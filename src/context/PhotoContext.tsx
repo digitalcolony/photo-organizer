@@ -55,7 +55,7 @@ function photoReducer(state: PhotoState, action: PhotoAction): PhotoState {
 		case "SET_CURRENT_PHOTO":
 			return { ...state, currentPhotoIndex: action.payload };
 		case "SET_ALBUMS":
-			return { ...state, albums: action.payload };
+			return { ...state, albums: action.payload.sort((a, b) => a.name.localeCompare(b.name)) };
 		case "SET_LOADING":
 			return { ...state, isLoading: action.payload };
 		case "SET_OPERATION":
@@ -77,7 +77,9 @@ function photoReducer(state: PhotoState, action: PhotoAction): PhotoState {
 		case "ADD_ALBUM":
 			return {
 				...state,
-				albums: [...state.albums, { name: action.payload, photoCount: 0 }],
+				albums: [...state.albums, { name: action.payload, photoCount: 0 }].sort((a, b) =>
+					a.name.localeCompare(b.name)
+				),
 			};
 		case "INCREMENT_ALBUM_COUNT":
 			return {
